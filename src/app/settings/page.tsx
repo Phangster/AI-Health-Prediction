@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -14,11 +14,9 @@ import {
   TrendingUp, 
   TrendingDown, 
   Scale, 
-  Calendar,
   CheckCircle,
   AlertTriangle,
   Clock,
-  User,
   Settings as SettingsIcon
 } from "lucide-react";
 import { toast } from "sonner";
@@ -66,7 +64,6 @@ export default function SettingsPage() {
   const [progressData, setProgressData] = useState<ProgressData | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
   // Form state
   const [goalType, setGoalType] = useState<'lose' | 'gain' | 'maintain'>('lose');
@@ -90,12 +87,7 @@ export default function SettingsPage() {
     }
   }, [session]);
 
-  // Calculate progress when data changes
-  useEffect(() => {
-    if (weightGoal && foods.length > 0) {
-      calculateProgress();
-    }
-  }, [weightGoal, foods]);
+
 
   const fetchWeightGoal = async () => {
     try {
@@ -111,8 +103,8 @@ export default function SettingsPage() {
           setWeeklyGoal(data.weightGoal.weeklyGoal.toString());
         }
       }
-    } catch (e) {
-      console.error("Failed to fetch weight goal:", e);
+    } catch {
+      console.error("Failed to fetch weight goal");
     }
   };
 
@@ -124,15 +116,15 @@ export default function SettingsPage() {
         const data = await res.json();
         setFoods(data);
       } else {
-        setError("Failed to load food data");
+        console.error("Failed to load food data");
       }
-    } catch (e) {
-      setError("Failed to load food data");
+    } catch {
+      console.error("Failed to load food data");
     }
     setLoading(false);
   };
 
-  const calculateProgress = () => {
+  const calculateProgress = useCallback(() => {
     if (!weightGoal) return;
 
     const startDate = new Date(weightGoal.startDate);
@@ -180,7 +172,14 @@ export default function SettingsPage() {
       onTrack,
       progressPercentage
     });
-  };
+  }, [weightGoal, foods]);
+
+  // Calculate progress when data changes
+  useEffect(() => {
+    if (weightGoal && foods.length > 0) {
+      calculateProgress();
+    }
+  }, [weightGoal, foods, calculateProgress]);
 
   const handleSaveGoal = async () => {
     if (!currentWeight || !targetWeight || !targetDate || !weeklyGoal) {
@@ -214,7 +213,7 @@ export default function SettingsPage() {
       } else {
         toast.error("Failed to save weight goal");
       }
-    } catch (e) {
+    } catch {
       toast.error("Failed to save weight goal");
     }
     setSaving(false);
@@ -307,7 +306,7 @@ export default function SettingsPage() {
                           ? 'border-blue-500 bg-blue-50'
                           : 'border-gray-200 hover:border-gray-300'
                       }`}
-                      onClick={() => setGoalType(goal.value as any)}
+                      onClick={() => setGoalType(goal.value as 'lose' | 'gain' | 'maintain')}
                     >
                       <div className="flex items-center gap-2">
                         <goal.icon className="h-4 w-4" />
@@ -512,7 +511,10 @@ export default function SettingsPage() {
                 <p className="text-muted-foreground mb-4">
                   Set a weight goal to start tracking your progress against your diet.
                 </p>
-                <Button onClick={() => document.querySelector('[data-value="weight-goal"]')?.click()}>
+                <Button onClick={() => {
+                  const tab = document.querySelector('[data-value="weight-goal"]') as HTMLElement;
+                  if (tab) tab.click();
+                }}>
                   Set Weight Goal
                 </Button>
               </CardContent>

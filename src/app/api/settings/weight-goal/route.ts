@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { authOptions } from "@/lib/auth";
 import dbConnect from "@/lib/mongodb";
 import User from "@/models/User";
 import WeightGoal from "@/models/WeightGoal";
@@ -19,7 +19,7 @@ interface WeightGoal {
 }
 
 // GET: Retrieve user's weight goal
-export async function GET(req: NextRequest) {
+export async function GET() {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.email) {
@@ -38,13 +38,13 @@ export async function GET(req: NextRequest) {
     const weightGoal = await WeightGoal.findOne({ userId: user._id });
 
     return NextResponse.json({ weightGoal });
-  } catch (error: any) {
-    console.error("Get weight goal error:", error);
-    return NextResponse.json(
-      { error: "Failed to retrieve weight goal" },
-      { status: 500 }
-    );
-  }
+      } catch (error: unknown) {
+      console.error("Get weight goal error:", error);
+      return NextResponse.json(
+        { error: "Failed to retrieve weight goal" },
+        { status: 500 }
+      );
+    }
 }
 
 // POST: Create or update user's weight goal
@@ -90,11 +90,11 @@ export async function POST(req: NextRequest) {
     );
 
     return NextResponse.json({ weightGoal });
-  } catch (error: any) {
-    console.error("Save weight goal error:", error);
-    return NextResponse.json(
-      { error: "Failed to save weight goal" },
-      { status: 500 }
-    );
-  }
+      } catch (error: unknown) {
+      console.error("Save weight goal error:", error);
+      return NextResponse.json(
+        { error: "Failed to save weight goal" },
+        { status: 500 }
+      );
+    }
 } 

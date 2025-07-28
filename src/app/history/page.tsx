@@ -116,7 +116,7 @@ export default function HistoryPage() {
       } else {
         setError("Failed to load foods");
       }
-    } catch (e) {
+    } catch {
       setError("Failed to load foods");
     }
     setLoading(false);
@@ -153,13 +153,7 @@ export default function HistoryPage() {
     );
   };
 
-  const formatCurrency = (amount: number | null) => {
-    if (amount === null) return "N/A";
-    return new Intl.NumberFormat("en-US", {
-      style: "currency",
-      currency: "USD",
-    }).format(amount);
-  };
+
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString("en-US", {
@@ -174,9 +168,7 @@ export default function HistoryPage() {
     return timeString;
   };
 
-  const getTotalItems = (items: Food["food_items"]) => {
-    return items.length;
-  };
+
 
 
 

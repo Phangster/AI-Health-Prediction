@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -13,7 +13,6 @@ import {
   Apple, 
   Beef, 
   Wheat, 
-  Milk, 
   Calendar,
   Target,
   AlertTriangle,
@@ -78,7 +77,25 @@ export default function AnalyticsPage() {
   const [error, setError] = useState<string | null>(null);
   const [nutritionTrends, setNutritionTrends] = useState<NutritionTrend[]>([]);
   const [healthInsights, setHealthInsights] = useState<HealthInsight[]>([]);
-  const [healthPrediction, setHealthPrediction] = useState<any>(null);
+  const [healthPrediction, setHealthPrediction] = useState<{
+    overallHealth: string;
+    riskFactors: string[];
+    recommendations: string[];
+    predictedTrajectory: string;
+    timeframe: string;
+    confidence: number;
+    nutritionSummary: {
+      totalMeals: number;
+      daysTracked: number;
+      averageDailyCalories: number;
+      averageDailyCarbs: number;
+      averageDailyProtein: number;
+      averageDailyFat: number;
+      averageDailySugar: number;
+      averageDailySodium: number;
+      mealTypes: Record<string, number>;
+    };
+  } | null>(null);
   const [predictionLoading, setPredictionLoading] = useState(false);
   const [lastPredictionDate, setLastPredictionDate] = useState<string | null>(null);
 
@@ -89,17 +106,9 @@ export default function AnalyticsPage() {
     }
   }, [status, router]);
 
-  // Fetch foods and latest prediction when session is available
-  useEffect(() => {
-    if (session) {
-      fetchFoods();
-      fetchLatestPrediction();
-    }
-  }, [session]);
-
   // Remove automatic health prediction trigger
 
-  const fetchFoods = async () => {
+  const fetchFoods = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
@@ -112,13 +121,13 @@ export default function AnalyticsPage() {
       } else {
         setError("Failed to load food data");
       }
-    } catch (e) {
+    } catch {
       setError("Failed to load food data");
     }
     setLoading(false);
-  };
+  }, []);
 
-  const fetchLatestPrediction = async () => {
+  const fetchLatestPrediction = useCallback(async () => {
     try {
       const res = await fetch("/api/health/predict", {
         method: "GET",
@@ -132,10 +141,18 @@ export default function AnalyticsPage() {
       } else {
         console.error("Failed to fetch latest prediction");
       }
-    } catch (e) {
-      console.error("Failed to fetch latest prediction:", e);
+    } catch {
+      console.error("Failed to fetch latest prediction");
     }
-  };
+  }, []);
+
+  // Fetch foods and latest prediction when session is available
+  useEffect(() => {
+    if (session) {
+      fetchFoods();
+      fetchLatestPrediction();
+    }
+  }, [session, fetchFoods, fetchLatestPrediction]);
 
   const fetchHealthPrediction = async () => {
     setPredictionLoading(true);
@@ -150,8 +167,8 @@ export default function AnalyticsPage() {
       } else {
         console.error("Failed to fetch health prediction");
       }
-    } catch (e) {
-      console.error("Failed to fetch health prediction:", e);
+    } catch {
+      console.error("Failed to fetch health prediction");
     }
     setPredictionLoading(false);
   };
@@ -211,7 +228,6 @@ export default function AnalyticsPage() {
     const avgCalories = foodData.reduce((sum, f) => sum + f.total_calories, 0) / totalDays;
     const avgCarbs = foodData.reduce((sum, f) => sum + f.total_carbs, 0) / totalDays;
     const avgProtein = foodData.reduce((sum, f) => sum + f.total_protein, 0) / totalDays;
-    const avgFat = foodData.reduce((sum, f) => sum + f.total_fat, 0) / totalDays;
     const avgSugar = foodData.reduce((sum, f) => sum + f.total_sugar, 0) / totalDays;
 
     // Calorie insights
@@ -362,7 +378,6 @@ export default function AnalyticsPage() {
   const avgCalories = foods.length > 0 ? foods.reduce((sum, f) => sum + f.total_calories, 0) / foods.length : 0;
   const avgCarbs = foods.length > 0 ? foods.reduce((sum, f) => sum + f.total_carbs, 0) / foods.length : 0;
   const avgProtein = foods.length > 0 ? foods.reduce((sum, f) => sum + f.total_protein, 0) / foods.length : 0;
-  const avgFat = foods.length > 0 ? foods.reduce((sum, f) => sum + f.total_fat, 0) / foods.length : 0;
 
   return (
     <div className="container mx-auto p-6">
@@ -445,7 +460,7 @@ export default function AnalyticsPage() {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {recentTrends.map((trend, index) => (
+                {recentTrends.map((trend) => (
                   <div key={trend.date} className="flex items-center justify-between p-4 border rounded-lg">
                     <div className="flex items-center gap-4">
                       <Calendar className="h-4 w-4 text-muted-foreground" />

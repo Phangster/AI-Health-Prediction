@@ -3,13 +3,38 @@ import React, { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Folder, Crop } from "lucide-react";
 import { FoodAnalysisDialog } from "@/components/FoodAnalysisDialog";
+import Image from 'next/image';
+
 import { ImageCropDialog } from "@/components/ImageCropDialog";
 import { toast } from "sonner";
 
 export default function DashboardPage() {
   const [file, setFile] = useState<File | null>(null);
   const [imageUrl, setImageUrl] = useState<string | null>(null);
-  const [result, setResult] = useState<any>(null);
+  const [result, setResult] = useState<{
+    success: boolean;
+    extracted: {
+      food_items: Array<{
+        name: string;
+        calories: number;
+        protein: number;
+        carbs: number;
+        fat: number;
+        fiber: number;
+        sugar: number;
+        sodium: number;
+      }>;
+      total_calories: number;
+      total_protein: number;
+      total_carbs: number;
+      total_fat: number;
+      total_fiber: number;
+      total_sugar: number;
+      total_sodium: number;
+      meal_type: string;
+      estimated_portion_size: string;
+    };
+  } | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [dragActive, setDragActive] = useState(false);
@@ -49,7 +74,7 @@ export default function DashboardPage() {
     setDragActive(false);
   };
 
-  const handleDropzoneClick = (e: React.MouseEvent<HTMLDivElement>) => {
+  const handleDropzoneClick = () => {
     if (!dragActive) inputRef.current?.click();
   };
 
@@ -75,7 +100,7 @@ export default function DashboardPage() {
       } else {
         setError(data.error || "Analysis failed");
       }
-    } catch (e) {
+    } catch {
       setError("Server error");
     }
     setLoading(false);
@@ -100,7 +125,27 @@ export default function DashboardPage() {
     description: string;
     date: string;
     time: string;
-    nutritionData: any;
+    nutritionData: {
+      food_items: Array<{
+        name: string;
+        calories: number;
+        protein: number;
+        carbs: number;
+        fat: number;
+        fiber: number;
+        sugar: number;
+        sodium: number;
+      }>;
+      total_calories: number;
+      total_protein: number;
+      total_carbs: number;
+      total_fat: number;
+      total_fiber: number;
+      total_sugar: number;
+      total_sodium: number;
+      meal_type: string;
+      estimated_portion_size: string;
+    };
   }) => {
     console.log("💾 Saving Food Data:", {
       name: data.name,
@@ -142,7 +187,7 @@ export default function DashboardPage() {
         console.log("❌ Save Food Error:", errorData);
         toast.error(errorData.error || "Failed to save food analysis");
       }
-    } catch (e) {
+    } catch {
       toast.error("Failed to save food analysis");
     }
     setSavingReceipt(false);
@@ -181,8 +226,10 @@ export default function DashboardPage() {
           </> )}
           {file && (
             <div className="mt-4 w-full flex flex-col items-center gap-2">
-              <img
+              <Image
                 src={imageUrl!}
+                width={120}
+                height={120}
                 alt="Food photo preview"
                 className="max-w-xs max-h-64 rounded border border-muted shadow"
               />
@@ -221,7 +268,18 @@ export default function DashboardPage() {
       <FoodAnalysisDialog
         isOpen={showDialog}
         onClose={() => setShowDialog(false)}
-        nutritionData={result?.extracted || {}}
+                    nutritionData={result?.extracted || {
+              food_items: [],
+              total_calories: 0,
+              total_protein: 0,
+              total_carbs: 0,
+              total_fat: 0,
+              total_fiber: 0,
+              total_sugar: 0,
+              total_sodium: 0,
+              meal_type: "lunch",
+              estimated_portion_size: "medium",
+            }}
         onConfirm={handleSaveFood}
         isLoading={savingReceipt}
       />

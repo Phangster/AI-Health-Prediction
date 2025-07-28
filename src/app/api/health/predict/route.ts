@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { authOptions } from "@/lib/auth";
 import OpenAI from "openai";
 import dbConnect from "@/lib/mongodb";
 import HealthPrediction from "@/models/HealthPrediction";
@@ -43,7 +43,7 @@ interface HealthPrediction {
   confidence: number;
 }
 
-export async function GET(req: NextRequest) {
+export async function GET() {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.email) {
@@ -68,13 +68,13 @@ export async function GET(req: NextRequest) {
     }
 
     return NextResponse.json({ prediction: latestPrediction });
-  } catch (error: any) {
-    console.error("Get health prediction error:", error);
-    return NextResponse.json(
-      { error: "Failed to retrieve health prediction" },
-      { status: 500 }
-    );
-  }
+      } catch (error: unknown) {
+      console.error("Get health prediction error:", error);
+      return NextResponse.json(
+        { error: "Failed to retrieve health prediction" },
+        { status: 500 }
+      );
+    }
 }
 
 export async function POST(req: NextRequest) {
@@ -201,7 +201,7 @@ export async function POST(req: NextRequest) {
         } else {
           throw new Error("No JSON found in response");
         }
-      } catch (parseError) {
+      } catch {
         console.error("Failed to parse OpenAI response:", content);
         throw new Error("Invalid prediction data format");
       }
@@ -235,7 +235,7 @@ export async function POST(req: NextRequest) {
         prediction: savedPrediction
       });
 
-    } catch (openaiError: any) {
+    } catch (openaiError: unknown) {
       console.error("OpenAI API error:", openaiError);
       return NextResponse.json(
         { error: "Failed to generate health prediction" },
@@ -243,7 +243,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Health prediction error:", error);
     return NextResponse.json(
       { error: "Failed to generate health prediction" },

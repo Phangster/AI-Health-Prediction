@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import {
   Dialog,
   DialogContent,
@@ -12,7 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Badge } from "@/components/ui/badge";
+
 import { Loader2, Utensils, Calendar, Clock } from "lucide-react";
 
 interface FoodItem {
@@ -67,7 +67,7 @@ export function FoodAnalysisDialog({
   originalDescription,
 }: FoodAnalysisDialogProps) {
   // Ensure nutritionData is not undefined
-  const safeNutritionData = nutritionData || {
+  const safeNutritionData = useMemo(() => nutritionData || {
     food_items: [],
     total_calories: 0,
     total_protein: 0,
@@ -78,7 +78,7 @@ export function FoodAnalysisDialog({
     total_sodium: 0,
     meal_type: "lunch",
     estimated_portion_size: "medium",
-  };
+  }, [nutritionData]);
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [date, setDate] = useState("");
@@ -113,7 +113,7 @@ export function FoodAnalysisDialog({
       };
       setEditableData(processedNutritionData);
     }
-  }, [isOpen, nutritionData, originalName, originalDescription]);
+  }, [isOpen, nutritionData, originalName, originalDescription, safeNutritionData]);
 
 
 

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { authOptions } from "@/lib/auth";
 import OpenAI from "openai";
 
 export async function POST(req: NextRequest) {
@@ -97,7 +97,7 @@ export async function POST(req: NextRequest) {
         } else {
           throw new Error("No JSON found in response");
         }
-      } catch (parseError) {
+      } catch {
         console.error("Failed to parse OpenAI response:", content);
         throw new Error("Invalid nutrition data format");
       }
@@ -112,7 +112,7 @@ export async function POST(req: NextRequest) {
         extracted: nutritionData,
       });
 
-    } catch (openaiError: any) {
+    } catch (openaiError: unknown) {
       console.error("OpenAI API error:", openaiError);
       return NextResponse.json(
         { error: "Failed to analyze food image with AI" },
@@ -120,7 +120,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Food analysis error:", error);
     return NextResponse.json(
       { error: "Failed to analyze food image" },

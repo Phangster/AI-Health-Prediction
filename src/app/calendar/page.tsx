@@ -4,10 +4,10 @@ import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Calendar, Store, DollarSign, Package, RefreshCw, ChevronLeft, ChevronRight, Clock, X } from "lucide-react";
+import { Calendar, Package, RefreshCw, ChevronLeft, ChevronRight, Clock } from "lucide-react";
 
 interface Food {
   _id: string;
@@ -74,19 +74,13 @@ export default function CalendarPage() {
       } else {
         setError("Failed to load foods");
       }
-    } catch (e) {
+    } catch {
       setError("Failed to load foods");
     }
     setLoading(false);
   };
 
-  const formatCurrency = (amount: number | null) => {
-    if (amount === null) return "N/A";
-    return new Intl.NumberFormat("en-US", {
-      style: "currency",
-      currency: "USD",
-    }).format(amount);
-  };
+
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString("en-US", {
@@ -99,10 +93,6 @@ export default function CalendarPage() {
   const formatTime = (timeString?: string) => {
     if (!timeString) return "";
     return timeString;
-  };
-
-  const getTotalItems = (items: Food["food_items"]) => {
-    return items.reduce((sum, item) => sum + item.quantity, 0);
   };
 
   const toggleItems = (receiptId: string) => {
@@ -332,7 +322,7 @@ export default function CalendarPage() {
                 ) : (
                   <div className="space-y-4">
                   {selectedDateFoods.map((food) => (
-                    <Card key={food._id} className="border shadow-sm">
+                    <Card key={food._id} className="border shadow-sm py-0">
                       <CardContent className="p-4 space-y-3">
                         <div className="flex items-start justify-between">
                           <div className="flex-1">
@@ -344,9 +334,6 @@ export default function CalendarPage() {
                               </div>
                             )}
                           </div>
-                          <Badge variant="secondary">
-                            {getTotalItems(food.food_items)} items
-                          </Badge>
                         </div>
 
                         <div className="flex items-center gap-2 text-sm">

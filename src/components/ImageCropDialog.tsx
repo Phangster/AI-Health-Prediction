@@ -1,11 +1,11 @@
 "use client";
 
 import { useState, useRef, useCallback } from "react";
+import Image from 'next/image';
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
@@ -21,25 +21,7 @@ interface ImageCropDialogProps {
   onConfirm: (croppedImageBlob: Blob) => void;
 }
 
-function centerAspectCrop(
-  mediaWidth: number,
-  mediaHeight: number,
-  aspect: number,
-) {
-  return centerCrop(
-    makeAspectCrop(
-      {
-        unit: '%',
-        width: 90,
-      },
-      aspect,
-      mediaWidth,
-      mediaHeight,
-    ),
-    mediaWidth,
-    mediaHeight,
-  )
-}
+
 
 export function ImageCropDialog({
   isOpen,
@@ -197,8 +179,10 @@ export function ImageCropDialog({
                 keepSelection
                 ruleOfThirds
               >
-                <img
+                <Image
                   ref={imgRef}
+                  width={120}
+                  height={120}
                   alt="Receipt to crop"
                   src={imageUrl}
                   style={{

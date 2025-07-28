@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { authOptions } from "@/lib/auth";
 import dbConnect from "@/lib/mongodb";
 import User from "@/models/User";
 import Food from "@/models/Food";
 
-export async function GET(req: NextRequest) {
+export async function GET() {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.email) {
@@ -20,7 +20,7 @@ export async function GET(req: NextRequest) {
 
     const foods = await Food.find({ userId: user._id }).sort({ createdAt: -1 });
     return NextResponse.json(foods);
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Error fetching foods:", error);
     return NextResponse.json(
       { error: "Failed to fetch foods" },
@@ -89,7 +89,7 @@ export async function POST(req: NextRequest) {
 
     await food.save();
     return NextResponse.json(food);
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Error saving food:", error);
     return NextResponse.json(
       { error: "Failed to save food analysis" },

@@ -7,8 +7,10 @@ if (!MONGODB_URI) {
 }
 
 declare global {
-  // eslint-disable-next-line no-var
-  var mongoose: any;
+  var mongoose: {
+    conn: unknown;
+    promise: unknown;
+  } | null;
 }
 
 let cached = global.mongoose;
@@ -18,16 +20,16 @@ if (!cached) {
 }
 
 async function dbConnect() {
-  if (cached.conn) {
+  if (cached?.conn) {
     return cached.conn;
   }
-  if (!cached.promise) {
-    cached.promise = mongoose.connect(MONGODB_URI).then((mongoose) => {
+  if (!cached?.promise) {
+    cached!.promise = mongoose.connect(MONGODB_URI).then((mongoose) => {
       return mongoose;
     });
   }
-  cached.conn = await cached.promise;
-  return cached.conn;
+  cached!.conn = await cached!.promise;
+  return cached!.conn;
 }
 
 export default dbConnect; 
