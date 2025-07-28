@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import { SidebarTrigger } from "@/components/ui/sidebar";
+import { SidebarTrigger, SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/app-sidebar";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth";
@@ -45,11 +45,19 @@ export default async function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <Providers>
-          {isAuthenticated && <AppSidebar user={user!} />}
-          <main className={isAuthenticated ? "w-full min-h-screen" : "w-full min-h-screen"}>
-            {isAuthenticated && <SidebarTrigger className="top-4 left-4" />}
-            {children}
-          </main>
+          {isAuthenticated ? (
+            <SidebarProvider>
+              <AppSidebar user={user!} />
+              <main className="w-full min-h-screen">
+                <SidebarTrigger className="top-4 left-4" />
+                {children}
+              </main>
+            </SidebarProvider>
+          ) : (
+            <main className="w-full min-h-screen">
+              {children}
+            </main>
+          )}
         </Providers>
       </body>
     </html>
