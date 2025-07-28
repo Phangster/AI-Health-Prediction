@@ -13,8 +13,8 @@ export default async function Home() {
     redirect("/dashboard");
   }
   return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-center max-w-xl text-center">
+    <div className="flex flex-col items-center justify-center min-h-screen p-8">
+      <main className="flex flex-col gap-8 items-center max-w-xl text-center">
         <Image
           className="dark:invert mb-4"
           src="/next.svg"
@@ -40,7 +40,7 @@ export default async function Home() {
           Please <span className="font-semibold">login</span> or <span className="font-semibold">sign up</span> to get started.
         </p>
       </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center text-xs text-muted-foreground">
+      <footer className="flex gap-[24px] flex-wrap items-center justify-center text-xs text-muted-foreground mt-8">
         <span>Built with Next.js, shadcn/ui, and AI OCR</span>
       </footer>
     </div>

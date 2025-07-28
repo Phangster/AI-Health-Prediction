@@ -28,6 +28,10 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   const session = await getServerSession(authOptions);
+  
+  // Check if user is authenticated
+  const isAuthenticated = !!session?.user;
+  
   const user = session?.user
     ? {
         name: session.user.name ?? undefined,
@@ -41,9 +45,9 @@ export default async function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <Providers>
-          {user && <AppSidebar user={user} />}
-          <main className={user ? "w-full min-h-screen" : "min-h-screen"}>
-            {user && <SidebarTrigger className="top-4 left-4" />}
+          {isAuthenticated && <AppSidebar user={user!} />}
+          <main className={isAuthenticated ? "w-full min-h-screen" : "w-full min-h-screen"}>
+            {isAuthenticated && <SidebarTrigger className="top-4 left-4" />}
             {children}
           </main>
         </Providers>
